@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "chrometrace"
+version = "0.1.0"
+description = "A Python library for Chrome Trace Viewer files"
+authors = ["Jonas Ehrlich <jonas.ehrlich@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/jonasehrlich/chrometrace"
+repository = "https://github.com/jonasehrlich/chrometrace"
+keywords = ["trace", "chromium"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+pyyaml = "6.0"
+tomli = { version = "^2.0.1", python = "<3.11" }
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+ruff = "^0.0.256"
+pre-commit = "^3.1.1"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120

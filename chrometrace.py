@@ -1,3 +1,4 @@
+import collections.abc
 import dataclasses
 import enum
 import functools
@@ -513,6 +514,56 @@ class TraceEvent:
         )
 
 
+class _TraceWriter:
+    """Trace writer for the array trace format"""
+
+    def __init__(self, path: os.PathLike[str] | str) -> None:
+        self._path = path
+        self._file_handle: ty.TextIO | None = None
+
+    def open(self):
+        """Open the chrometrace output file and write the opening square bracket"""
+        if not self.opened():
+            self._file_handle = open(self._path, "w")
+            self._file_handle.write("[")
+
+    def opened(self) -> bool:
+        """Return whether the file is opened"""
+        return not self.closed()
+
+    def close(self) -> None:
+        """
+        Flush and close this trace sink. This method has no effect if the sink is already closed.
+        Once the file is closed, any operation on the file (e.g. reading or writing) will raise a ValueError.
+
+        As a convenience, it is allowed to call this method more than once; only the first call, however,
+        will have an effect.
+        """
+        if self.opened():
+            self._file_handle = ty.cast(ty.TextIO, self._file_handle)
+            # Remove the last two characters (", ") from the file because JSON does not allow trailing
+            # commas in arrays or objects
+            self._file_handle.seek(self._file_handle.tell() - 2)
+            self._file_handle.truncate()
+            # Close the array, even though it would not be required according to the chrometrace specification
+            self._file_handle.write("]")
+            self._file_handle.close()
+            self._file_handle = None
+
+    def closed(self) -> bool:
+        """Return whether the file is closed"""
+        return self._file_handle is None
+
+    def write(self, trace_events: collections.abc.Iterable[TraceEvent]) -> None:
+        if self.closed():
+            raise ValueError("I/O operation on closed file.")
+
+        self._file_handle = ty.cast(ty.TextIO, self._file_handle)
+
+        self._file_handle.write(json.dumps([event.to_dict() for event in trace_events])[1:-1])
+        self._file_handle.write(", ")
+
+
 class TraceSink:
     """
     Sink for collecting chrometrace events and writing them to a file in the JSON array format.
@@ -541,11 +592,10 @@ class TraceSink:
         :param cache_size: Size of the internal cache, only applicable if `stream` is set to `True`, defaults to 20
         :type cache_size: int, optional
         """
-        self._path = path
         self._stream = stream
         self._cache_size = cache_size
         self._trace_events: list[TraceEvent] = list()
-        self._file_handle: ty.TextIO | None = None
+        self._trace_writer = _TraceWriter(path)
 
     def add_trace_event(self, trace_event: TraceEvent) -> None:
         """
@@ -557,7 +607,7 @@ class TraceSink:
             * Streaming is enabled
         """
         self._trace_events.append(trace_event)
-        if self._stream and len(self._trace_events) >= self._cache_size and self.opened():
+        if self._stream and len(self._trace_events) >= self._cache_size and self._trace_writer.opened():
             self.flush()
 
     def num_cached_items(self) -> int:
@@ -566,42 +616,26 @@ class TraceSink:
 
     def __enter__(self) -> ty.Self:
         if self._stream:
-            self.open()
+            self._trace_writer.open()
         return self
 
     def __exit__(self, exc_type: ty.Type[Exception], exc_value: Exception, tb: ty.Any):
-        if not self._stream:
-            self.open()
         self.close()
-
-    def open(self):
-        """Open the chrometrace output file and write the opening square bracket"""
-
-        self._file_handle = open(self._path, "w")
-        self._file_handle.write("[")
-
-    def opened(self) -> bool:
-        """Return whether the file is opened"""
-        return not self.closed()
 
     def flush(self) -> None:
         """
-        Flush the trace events to the buffers of the opened file.
+        Flush the trace events to the trace writer.
 
-        :raises ValueError: Raised if the internal file is not opened
+        :raises ValueError: Raised if the trace writer is not opened
         """
-        if self.closed():
+        if self._trace_writer.closed():
             raise ValueError("I/O operation on closed file.")
 
         if not self._trace_events:
             # Nothing to flush
             return
 
-        self._file_handle = ty.cast(ty.TextIO, self._file_handle)
-
-        self._file_handle.write(json.dumps([event.to_dict() for event in self._trace_events])[1:-1])
-        self._file_handle.write(", ")
-        # Clear the internally cached trace events
+        self._trace_writer.write(self._trace_events)
         self._trace_events = []
 
     def close(self) -> None:
@@ -612,21 +646,10 @@ class TraceSink:
         As a convenience, it is allowed to call this method more than once; only the first call, however,
         will have an effect.
         """
-        if self.opened():
+        if self._trace_writer.opened():
             self._file_handle = ty.cast(ty.TextIO, self._file_handle)
             self.flush()
-            # Remove the last two characters (", ") from the file because JSON does not allow trailing
-            # commas in arrays or objects
-            self._file_handle.seek(self._file_handle.tell() - 2)
-            self._file_handle.truncate()
-            # Close the array, even though it would not be required according to the chrometrace specification
-            self._file_handle.write("]")
-            self._file_handle.close()
-            self._file_handle = None
-
-    def closed(self) -> bool:
-        """Return whether the file is closed"""
-        return self._file_handle is None
+        self._trace_writer.close()
 
     def process_tracer(self, process_name: str, process_id: int):
         """

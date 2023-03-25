@@ -32,4 +32,4 @@ jobs:
           poetry run ruff --format=github --target-version=py310 .
       - name: Test with pytest
         run: |
-          poetry pytest
+          poetry run pytest

@@ -735,7 +735,7 @@ class _ThreadTracer(_Tracer[str, int]):
 
        with TraceSink("my-traces.json") as trace_sink:
            process_tracer = trace_sink.process_tracer("my-process", 0)
-           thread_tracer = process_tracer("my-thread", 0)
+           thread_tracer = process_tracer.thread_tracer("my-thread", 0)
     """
 
     def __init__(

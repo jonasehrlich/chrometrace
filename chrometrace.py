@@ -616,21 +616,21 @@ class TraceSink:
 
     def __enter__(self) -> ty.Self:
         if self._stream:
+            # If we stream data to the trace writer, keep the file open
             self._trace_writer.open()
         return self
 
     def __exit__(self, exc_type: ty.Type[Exception], exc_value: Exception, tb: ty.Any):
+        if self._trace_writer.closed():
+            # If we are not streaming, the TraceWriter (alas the output file) was never opened
+            self._trace_writer.open()
         self.close()
 
     def flush(self) -> None:
         """
         Flush the trace events to the trace writer.
 
-        :raises ValueError: Raised if the trace writer is not opened
         """
-        if self._trace_writer.closed():
-            raise ValueError("I/O operation on closed file.")
-
         if not self._trace_events:
             # Nothing to flush
             return
@@ -647,7 +647,6 @@ class TraceSink:
         will have an effect.
         """
         if self._trace_writer.opened():
-            self._file_handle = ty.cast(ty.TextIO, self._file_handle)
             self.flush()
         self._trace_writer.close()
 

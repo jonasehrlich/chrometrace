@@ -1,7 +1,8 @@
 # chrometrace
 
 A Python library for creating Chrome Trace Viewer files. The Chrome Trace Viewer can be opened in
-Chromium-based browsers (e.g. Google Chrome, Microsoft Edge, Chromium, ...) at `[chrome://tracing](chrome://tracing/)`.
+Chromium-based browsers (e.g. Google Chrome, Microsoft Edge, Chromium, ...) by entering _chrome://tracing_ into the
+address bar.
 
 The trace event format and types are defined in
 [this document](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU).

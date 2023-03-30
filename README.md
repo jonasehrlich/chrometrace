@@ -21,7 +21,7 @@ pip install chrometrace
 import chrometrace
 
 # Create the trace sink as a context manager
-with chrometrace.TraceSink(file_like.name) as trace_sink:
+with chrometrace.TraceSink("trace.json") as trace_sink:
     # Create a process tracer called myapp from the trace sink
     myapp_tracer = trace_sink.process_tracer("myapp", process_id=1337)
     # Create a thread tracer for the renderer thread from the process tracer

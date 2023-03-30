@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chrometrace"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python library for Chrome Trace Viewer files"
 authors = ["Jonas Ehrlich <jonas.ehrlich@gmail.com>"]
 readme = "README.md"

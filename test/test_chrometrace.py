@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-import chrometrace
+import chrometrace.chrometrace as chrometrace
 
 
 def read_trace_events(path: str) -> list[chrometrace.TraceEvent]:

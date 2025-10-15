@@ -523,7 +523,7 @@ class _TraceWriter:
         self._path = path
         self._file_handle: ty.TextIO | None = None
 
-    def open(self):
+    def open(self) -> None:
         """Open the chrometrace output file and write the opening square bracket"""
         if not self.opened():
             self._file_handle = open(self._path, "w")
@@ -622,7 +622,7 @@ class TraceSink:
             self._trace_writer.open()
         return self
 
-    def __exit__(self, exc_type: ty.Type[Exception], exc_value: Exception, tb: ty.Any):
+    def __exit__(self, exc_type: ty.Type[Exception], exc_value: Exception, tb: ty.Any) -> None:
         if self._trace_writer.closed():
             # If we are not streaming, the TraceWriter (alas the output file) was never opened
             self._trace_writer.open()
@@ -652,7 +652,7 @@ class TraceSink:
             self.flush()
         self._trace_writer.close()
 
-    def process_tracer(self, process_name: str, process_id: int):
+    def process_tracer(self, process_name: str, process_id: int) -> ProcessTracer:
         """
         Create a process tracer object from this trace sink
 
@@ -684,8 +684,8 @@ class _Tracer(ty.Generic[ThreadNameType, ThreadIDType]):
     ) -> None:
         self._process_name = process_name
         self._process_id = process_id
-        self._thread_name = thread_name
-        self._thread_id = thread_id
+        self._thread_name: ThreadNameType = thread_name
+        self._thread_id: ThreadIDType = thread_id
 
         self._trace_sink = trace_sink
 

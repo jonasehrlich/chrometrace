@@ -17,6 +17,7 @@ Repository = "https://github.com/jonasehrlich/chrometrace"
 
 [dependency-groups]
 dev = [
+    "mypy>=1.18.2",
     "pytest>=8.2.2",
     "pytest-cov>=7.0.0",
     "pytest-sugar>=1.0.0",
@@ -55,3 +56,7 @@ output = "coverage.xml"
 
 [tool.ruff]
 line-length = 120
+
+[tool.mypy]
+packages = ["chrometrace"]
+strict = true

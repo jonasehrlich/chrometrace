@@ -1,26 +1,30 @@
-[tool.poetry]
+[project]
 name = "chrometrace"
 version = "0.1.2"
 description = "A Python library for Chrome Trace Viewer files"
-authors = ["Jonas Ehrlich <jonas.ehrlich@gmail.com>"]
+authors = [{ name = "Jonas Ehrlich", email = "jonas.ehrlich@gmail.com" }]
+requires-python = ">=3.10"
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/jonasehrlich/chrometrace"
-repository = "https://github.com/jonasehrlich/chrometrace"
-keywords = ["trace", "chromium"]
+keywords = [
+    "trace",
+    "chromium",
+]
+
+[project.urls]
+Homepage = "https://github.com/jonasehrlich/chrometrace"
+Repository = "https://github.com/jonasehrlich/chrometrace"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2.2",
+    "pytest-sugar>=1.0.0",
+    "ruff>=0.5.2",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.dependencies]
-python = ">=3.10"
-
-[tool.poetry.group.dev.dependencies]
-black = "^24.4.2"
-ruff = "^0.5.2"
-pytest = "^8.2.2"
-pytest-sugar = "^1.0.0"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 120

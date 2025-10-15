@@ -3,33 +3,28 @@ name: Python package
 on: [push]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+    env:
+      UV_VERSION: "0.8.22"
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry/virtualenvs
-          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
-      - name: Check poetry availability
-        run: poetry --version
-      - name: Install dependencies with poetry
-        run: poetry install
-      - name: Lint with ruff
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run ruff check --output-format github --select=E9,F63,F7,F82 --target-version=py310 .
-          # default set of ruff rules with GitHub Annotations
-          poetry run ruff check --output-format github --target-version=py310 .
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - name: Install the dependencies
+        run: uv sync --locked --all-extras --dev
+      - name: check-format
+        run: uv run ruff format --check
+      - name: check-types
+        run: uv run mypy 
+      - name: lint
+        run: uv run ruff check --output-format github
       - name: Test with pytest
-        run: |
-          poetry run pytest
+        run: uv run pytest --cov

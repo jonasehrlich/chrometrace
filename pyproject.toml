@@ -3,7 +3,7 @@ name = "chrometrace"
 version = "0.1.2"
 description = "A Python library for Chrome Trace Viewer files"
 authors = [{ name = "Jonas Ehrlich", email = "jonas.ehrlich@gmail.com" }]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 license = "MIT"
 keywords = [
